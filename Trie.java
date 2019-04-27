@@ -1,123 +1,76 @@
-// Java implementation of search and insert operations
-// on Trie
+class TrieNode{
+    TrieNode[] child = new TrieNode[26];
+
+    boolean isEnd;
+    boolean isParent;
+
+    TrieNode(){
+        isEnd = false;
+        isParent = false;
+        for (int i = 0; i < 26; i++)
+            child[i] = null;
+    }
+};
+
 public class Trie {
-
-    // Alphabet size (# of symbols)
-    static final int ALPHABET_SIZE = 26;
-
-    // trie node
-    static class TrieNode
-    {
-        TrieNode[] children = new TrieNode[ALPHABET_SIZE];
-
-        // isEndOfWord is true if the node represents
-        // end of a word
-        boolean isEndOfWord;
-        boolean isParent;
-
-        TrieNode(){
-            isEndOfWord = false;
-            isParent = false;
-            for (int i = 0; i < ALPHABET_SIZE; i++)
-                children[i] = null;
-        }
-    };
 
     static TrieNode root;
 
-    // If not present, inserts key into trie
-    // If the key is prefix of trie node, 
-    // just marks leaf node
-    static void insert(String key)
-    {
-        int level;
-        int length = key.length();
-        int index;
-
-        TrieNode pCrawl = root;
-
-        for (level = 0; level < length; level++)
-        {
-            index = key.charAt(level) - 'a';
-            if (pCrawl.children[index] == null)
-                pCrawl.children[index] = new TrieNode();
-
-            pCrawl.isParent = true;
-            pCrawl = pCrawl.children[index];
+    static void insert(String word){
+        TrieNode node = root;
+        char[] letters = word.toCharArray();
+        for (char ch : letters){
+            int id = ch - 'a';
+            if (node.child[id] == null)
+                node.child[id] = new TrieNode();
+            node.isParent = true;
+            node = node.child[id];
         }
-
-        // mark last node as leaf
-        pCrawl.isEndOfWord = true;
+        node.isEnd = true;
     }
 
-    // Returns true if key presents in trie, else false
-    static TrieNode search(String key)
-    {
-        int level;
-        int length = key.length();
-        int index;
-        TrieNode pCrawl = root;
-
-        for (level = 0; level < length; level++)
-        {
-            index = key.charAt(level) - 'a';
-
-            if (pCrawl.children[index] == null)
+    static TrieNode search(String word){
+        TrieNode node = root;
+        char[] letters = word.toCharArray();
+        for (char ch : letters){
+            int id = ch - 'a';
+            if (node.child[id] == null)
                 return null;
-
-            pCrawl = pCrawl.children[index];
+            node = node.child[id];
         }
-
-        //return (pCrawl != null && pCrawl.isEndOfWord);
-        return pCrawl;
+        return node;
     }
 
-    static void suggestWords(String prefix, TrieNode t){
-        if(t.isEndOfWord){
-            System.out.println(prefix);
+    static void suggestWords(String text, TrieNode t){
+        if(t.isEnd){
+            System.out.println(text);
         }
-        String suggest = prefix;
-        for (int i = 0; i < ALPHABET_SIZE; i++) {
-            if (t.children[i] != null){
-                suggestWords(prefix+((char) (i+'a')), t.children[i]);
+        String suggest = text;
+        for (int i = 0; i < 26; i++) {
+            if (t.child[i] != null){
+                suggestWords(text+((char) (i+'a')), t.child[i]);
             }
         }
     }
 
-    static  int printAutoSuggestions(String prefix){
-
-        TrieNode pCrawl = search(prefix);
-        if (pCrawl!=null){
-
-
-            suggestWords(prefix,pCrawl);
-            return 1;
-
-
-        }
-        return -1;
-    }
-
-    // Driver
-    public static void main(String args[])
-    {
-        // Input keys (use only 'a' through 'z' and lower case)
-        String keys[] = {"help","hello","dog","hell","cat","a","helpful"};
-
-        String output[] = {"Not present in trie", "Present in trie"};
-
+    public static void main(String args[]){
+        String dict[] = {"help","hello","dog","hell","cat","a","helpful"};
 
         root = new TrieNode();
 
-        // Construct trie
-        int i;
-        for (i = 0; i < keys.length ; i++)
-            insert(keys[i]);
+        for (String word : dict)
+            insert(word);
 
-        //auto suggest
-        int comp = printAutoSuggestions("hel");
-        if (comp == -1){
-            System.out.println("No strings with the prefix found");
+        String textToSearch = "hel";
+        TrieNode node = search(textToSearch);
+        boolean autoSuggest = false;
+        if (node!=null) {
+            suggestWords(textToSearch, node);
+            autoSuggest = true;
+        }
+
+        if (!autoSuggest){
+            System.out.println("No strings for the given text");
         }
 
     }
